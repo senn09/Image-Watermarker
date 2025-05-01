@@ -1,0 +1,18 @@
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+.env
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.so
+.bash_profile
