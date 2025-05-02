@@ -10,9 +10,14 @@ class ViewManager:
         self.current_view = None
         self.callbacks = callbacks
 
-    def register_view(self, ):
+    def register_view(self, view_name, view):
+        pass
+
     def switch_to_view(self, view_name):
             pass
+
+    def get_current_view(self):
+        pass
 
     def update_image(self, image):
         pass
