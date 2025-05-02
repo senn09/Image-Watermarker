@@ -1,17 +1,45 @@
-from views import view
-from tkinter import ttk, colorchooser, filedialog as fd
+from tkinter import ttk, colorchooser, filedialog as fd, image_names
 import tkinter as tk
 from managers.image_manager import ImageManager
 from PIL import ImageTk
-
 from typing import Dict, Any
 
+class MainView():
+    def __init__(self, callbacks: Dict[str, Any]):
 
-# class MainView(view):
-#     def __init__(self, parent: tk.Tk, callbacks: Dict[str, Any]):
-#         super().__init__(parent, callbacks)
-#
-#         # Create Frames
+        self.root = tk.Tk()
+        self.root.title("Image Watermarker")
+        self.root.geometry("900x600")  # Set initial window size
+
+        self.image_manager = ImageManager()
+
+        # create menubar
+        self.menubar_callbacks = [self.update_preview, self.export_images]
+        menubar = Menubar(self.root, self.menubar_callbacks)
+        self.root.config(menu=menubar)
+
+        # create frames
+        self.settings_frame = SettingsFrame(self.root)
+
+        self.image_preview_callbacks = [self.image_manager.get_watermarked]
+        self.image_preview_frame = ImagePreviewFrame(self.root, self.image_preview_callbacks)
+
+        # pack frames
+        self.settings_frame.pack(side=tk.LEFT, fill=tk.Y, padx=10, pady=10)
+        self.image_preview_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+    def update_preview(self):
+        self.image_manager.select_files()
+        self.image_preview_frame.display_image()
+
+    def export_images(self):
+        pass
+
+    def run(self):
+        self.root.focus_force()
+        self.root.mainloop()
+
+
 
 
 class SettingsFrame(tk.Frame):
@@ -66,17 +94,17 @@ class SettingsFrame(tk.Frame):
             self.color_value = color[1]
             self.color_frame.config(bg=self.color_value)
 
-
 class ImagePreviewFrame(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, callbacks):
+        self.parent = parent
+        self.callbacks = callbacks
+
         self.width = 700
         self.height = 700
         self.border_width = 2
         self.border_color = "black"
 
-        self.image_manager = ImageManager()
-
-        super().__init__(parent,
+        super().__init__(self.parent,
                          width=self.width,
                          height=self.height,
                          bd=self.border_width,
@@ -102,25 +130,24 @@ class ImagePreviewFrame(tk.Frame):
 
     def display_image(self):
 
-        watermarked_image = self.image_manager.get_watermarked()
+        watermarked_image = self.callbacks[0]()
         preview_image = watermarked_image.reduce(max(int(watermarked_image.size[0] / self.width), int(watermarked_image.size[1] / self.height)))  # Reduce image to fit label
         photo = ImageTk.PhotoImage(preview_image)  # Convert to Tkinter-compatible format
         self.image_label.config(image=photo)
         self.image_label.image = photo
 
-
 class Menubar(tk.Menu):
-    def __init__(self, parent):
-        super().__init__(parent)
-
+    def __init__(self, parent, callbacks):
+        self.parent = parent
+        self.callbacks = callbacks
+        super().__init__(self.parent)
         self.create_filemenu()
 
     def create_filemenu(self):
         filemenu = tk.Menu(self, tearoff=0)
-        filemenu.add_command(label="Open Images", command=ImageManager.select_files)
-        filemenu.add_command(label="Export", command=ImageManager.export_watermarked)
+        filemenu.add_command(label="Open Images", command=self.callbacks[0])
+        filemenu.add_command(label="Export", command=self.callbacks[1])
         self.add_cascade(label="File", menu=filemenu)
-
 
 def test_SettingsFrame():
     root = tk.Tk()
@@ -130,7 +157,6 @@ def test_SettingsFrame():
 
     root.focus_force()
     root.mainloop()
-
 
 def test_Menubar():
     root = tk.Tk()
@@ -153,15 +179,24 @@ def test_ImagePreview():
     root.focus_force()
     root.mainloop()
 
+def test_MainView():
+
+    # Define callbacks (empty for this demo)
+    callbacks = {
+        "open_image": lambda: print("Opening image..."),
+        "save_image": lambda: print("Saving image..."),
+        "apply_effect": lambda effect: print(f"Applying {effect}...")
+    }
+
+    image_manager = ImageManager()
+
+    app = MainView(callbacks)
+    app.run()
+
 
 if __name__ == "__main__":
     # test_SettingsFrame()
     # test_Menubar()
-    test_ImagePreview()
+    # test_ImagePreview()
 
-class Settings():
-    pass
-
-
-class ImagePreview():
-    pass
+    test_MainView()
