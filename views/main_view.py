@@ -1,7 +1,11 @@
-from views import  view
-from tkinter import colorchooser, filedialog as fd
+from views import view
+from tkinter import ttk, colorchooser, filedialog as fd
 import tkinter as tk
+from managers.image_manager import ImageManager
+from PIL import ImageTk
+
 from typing import Dict, Any
+
 
 # class MainView(view):
 #     def __init__(self, parent: tk.Tk, callbacks: Dict[str, Any]):
@@ -19,7 +23,7 @@ class SettingsFrame(tk.Frame):
     def create_widgets(self):
         # Row 0: Text Setting
         tk.Label(self, text="Text: ", anchor="w").grid(row=0, column=0, sticky="w", padx=5, pady=5)
-        self.text_entry = tk.Entry(self, width= 30)
+        self.text_entry = tk.Entry(self, width=30)
         self.text_entry.grid(row=0, column=1, sticky="ew", padx=5, pady=5)
         self.text_entry.insert(0, "Watermark")
 
@@ -62,39 +66,102 @@ class SettingsFrame(tk.Frame):
             self.color_value = color[1]
             self.color_frame.config(bg=self.color_value)
 
-# class ImagePreviewFrame(tk.Frame):
+
+class ImagePreviewFrame(tk.Frame):
+    def __init__(self, parent):
+        self.width = 700
+        self.height = 700
+        self.border_width = 2
+        self.border_color = "black"
+
+        self.image_manager = ImageManager()
+
+        super().__init__(parent,
+                         width=self.width,
+                         height=self.height,
+                         bd=self.border_width,
+                         relief=tk.SOLID,
+                         bg=self.border_color)
+
+
+        self.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.create_widgets()
+
+        # Make the frame non-resizable
+        self.pack_propagate(False)
+
+    def create_widgets(self):
+        self.image_label = tk.Label(
+            self,
+            width=self.width - 2 * self.border_width,
+            height=self.height - 2 * self.border_width,
+            bg="white")
+
+        self.image_label.pack(padx=0, pady=0)
+
+
+    def display_image(self):
+
+        watermarked_image = self.image_manager.get_watermarked()
+        preview_image = watermarked_image.reduce(max(int(watermarked_image.size[0] / self.width), int(watermarked_image.size[1] / self.height)))  # Reduce image to fit label
+        photo = ImageTk.PhotoImage(preview_image)  # Convert to Tkinter-compatible format
+        self.image_label.config(image=photo)
+        self.image_label.image = photo
+
+
+class Menubar(tk.Menu):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.create_filemenu()
+
+    def create_filemenu(self):
+        filemenu = tk.Menu(self, tearoff=0)
+        filemenu.add_command(label="Open Images", command=ImageManager.select_files)
+        filemenu.add_command(label="Export", command=ImageManager.export_watermarked)
+        self.add_cascade(label="File", menu=filemenu)
+
 
 def test_SettingsFrame():
     root = tk.Tk()
     root.title("Program Settings")
     root.geometry("400x300")
     app = SettingsFrame(root)
+
+    root.focus_force()
     root.mainloop()
 
-if __name__ == "__main__":
-    test_SettingsFrame()
 
-# class Menubar():
-#     def __init__(self):
-#         pass
-#
-#     def select_files(self):
-#         filetypes = (
-#             ('Image files', '*.png *.jpg *.jpeg *.gif *.bmp *.tiff *.tif'),
-#             ('All files', '*.*')
-#         )
-#
-#         filenames = fd.askopenfilenames(
-#             title='Open files',
-#             initialdir='/Users/stevenhan/PycharmProjects/watermarker/images',
-#             filetypes=filetypes)
-#
-#         if filenames:
-#             # pass image file paths onto show_watermark_image_view
-#             self.on_sucess(filenames)
+def test_Menubar():
+    root = tk.Tk()
+    root.title("Menubar")
+    root.geometry("400x300")
+
+    menu = Menubar(root)
+    root.config(menu=menu)
+    root.focus_force()
+    root.mainloop()
+
+def test_ImagePreview():
+    root = tk.Tk()
+    root.title("Image Preview")
+    root.geometry("400x300")
+    app = ImagePreviewFrame(root)
+    app.image_manager.select_files()
+    app.image_manager.display_watermarked()
+    app.display_image()
+    root.focus_force()
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    # test_SettingsFrame()
+    # test_Menubar()
+    test_ImagePreview()
 
 class Settings():
     pass
+
 
 class ImagePreview():
     pass

@@ -97,7 +97,6 @@ class WatermarkImageFrame(ttk.Frame):
     def create_frames(self):
         # I have organized the view by having the settings in one frame and the image in another
         self.settings_frame = ttk.Frame()
-        self
 
     def create_watermark_settings_widget(self):
         watermark_text_label = ttk.Label(self, text="Watermark Text")
@@ -110,6 +109,7 @@ class WatermarkImageFrame(ttk.Frame):
         ttk.Label(self, text=self.image_paths).pack(side=tk.TOP)
 
         for path in self.image_paths:
+
             image = Image.open(path) # Load Image with PIL
             preview_image = image.reduce(int(image.size[0]/700)) # Reduce image to ~700 pixels
             photo = ImageTk.PhotoImage(preview_image) # Convert to Tkinter-compatible format
