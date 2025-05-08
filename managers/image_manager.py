@@ -1,5 +1,7 @@
+import logging
+
 import math
-from tkinter import ttk, colorchooser, filedialog as fd
+from tkinter import ttk, colorchooser, filedialog as fd, StringVar, IntVar
 from PIL import Image, ImageDraw, ImageFont
 
 class ImageManager:
@@ -21,26 +23,29 @@ class ImageManager:
             filetypes=filetypes)
 
         if filepaths:
-            self.load_images(filepaths)
+            return filepaths
+            logging.debug("sucessfully loaded filepaths")
+        else:
+            logging.debug("failed loaded filepaths")
+
 
 
     def load_images(self, paths):
         for path in paths:
             self.original_images.append((Image.open(path), path))
-        self.watermark_image()
 
 
-    def watermark_image(self):
+    def watermark_image(self, settings):
             base_im = self.original_images[self.current_index][0]
 
             # Create Watermark ---------------------------------------------------------------------
             font = ImageFont.truetype("/Library/Fonts/Arial.ttf", 100, encoding="unic")
-            text = "Watermark"
+            text = settings["text"].get()
             bbox = font.getbbox(text)
-            text_w = bbox[2] - bbox[0]
-            text_h = bbox[3] - bbox[1]
+            text_w = int(bbox[2] - bbox[0])
+            text_h = int(bbox[3] - bbox[1])
             wm_img_size = (text_w, text_h)
-            wm_angle = 45
+            wm_angle = settings["angle"].get()
             wm_img = Image.new("RGBA", wm_img_size, (255, 255, 255, 0))
 
             d = ImageDraw.Draw(wm_img)
@@ -74,5 +79,16 @@ class ImageManager:
 
 if __name__ == "__main__":
     manager = ImageManager()
-    manager.select_files()
-    manager.watermark_image()
+    filepaths = manager.select_files()
+    manager.load_images(filepaths)
+
+    settings = {
+        "text": "watermark",
+        "font_size": 120,
+        # "color": self.color_frame.get(),
+        "opacity": 100,
+        "angle": 45,
+    }
+
+    manager.watermark_image(settings)
+    manager.display_watermarked()
