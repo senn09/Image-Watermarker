@@ -1,6 +1,6 @@
 from tkinter import ttk, colorchooser, filedialog as fd, image_names
 import tkinter as tk
-from managers.image_manager import ImageManager
+from image_manager import ImageManager
 from PIL import ImageTk
 from typing import Dict, Any
 import logging
