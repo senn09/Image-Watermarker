@@ -32,11 +32,14 @@ class ImageManager:
 
     def load_images(self, paths):
         for path in paths:
-            self.original_images.append((Image.open(path), path))
+            self.original_images.append((Image.open(path, mode="r"), path))
 
 
     def watermark_image(self, settings):
             base_im = self.original_images[self.current_index][0]
+
+            if base_im.mode != 'RGBA':
+                base_im = base_im.convert('RGBA')
 
             # Create Watermark ---------------------------------------------------------------------
             font = ImageFont.truetype("/Library/Fonts/Arial.ttf", 100, encoding="unic")
@@ -65,6 +68,7 @@ class ImageManager:
                     tiled_wm_img.paste(wm_img, (wm_img_size[0] * i, wm_img_size[1] * j))
 
             # Paste watermark over base image ---------------------------------------------------------------------
+            print(base_im, tiled_wm_img)
             self.watermarked_image = Image.alpha_composite(base_im, tiled_wm_img)
 
 
@@ -75,7 +79,19 @@ class ImageManager:
         return self.watermarked_image
 
     def export_watermarked(self):
-        pass
+        print("image saved")
+
+        filetypes = (
+            ('Image files', '*.jpg'),
+            ('All files', '*.*')
+        )
+
+        filepath = fd.asksaveasfile(initialfile='saved_images/watermarked_image.txt',
+                              defaultextension=".jpg", filetypes=filetypes)
+
+
+        export_image = self.watermarked_image.convert('RGB')
+        export_image = export_image.save(filepath)
 
 if __name__ == "__main__":
     manager = ImageManager()
