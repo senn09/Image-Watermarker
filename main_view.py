@@ -63,7 +63,7 @@ class SettingsFrame(tk.Frame):
         self.settings = {
             "text": tk.StringVar(value="watermark"),
             "font_size": tk.IntVar(value=120),
-            # "color": self.color_frame.get(),
+            "color": tk.StringVar(value="#FF0000"),
             "opacity": tk.IntVar(value=100),
             "angle": tk.IntVar(value=45),
         }
@@ -85,13 +85,13 @@ class SettingsFrame(tk.Frame):
         tk.Label(self, text="Font Size: ", anchor="w").grid(row=1, column=0, sticky="w", padx=5, pady=5)
         self.font_size = tk.Spinbox(self, textvariable=self.settings["font_size"] ,from_=1, to=200, width=5)
         self.font_size.grid(row=1, column=1, sticky="w", padx=5, pady=5)
-        self.font_size.delete(0, tk.END)
-        self.font_size.insert(0, 120)
+        # self.font_size.delete(0, tk.END)
+        # self.font_size.insert(0, self.settings["font_size"].get())
 
 
         # Row 2: Color setting
         tk.Label(self, text="Colour:", anchor="w").grid(row=2, column=0, sticky="w", padx=5, pady=5)
-        self.color_frame = tk.Frame(self, bg="#FF0000", width=30, height=20)
+        self.color_frame = tk.Frame(self, bg=self.settings['color'].get(), width=30, height=20)
         self.color_frame.grid(row=2, column=1, sticky="w", padx=5, pady=5)
         self.color_button = tk.Button(self, text="Choose Colour", command=self.choose_color)
         self.color_button.grid(row=2, column=1, sticky="e", padx=5, pady=5)
@@ -99,26 +99,24 @@ class SettingsFrame(tk.Frame):
 
         # Row 3: Opacity setting
         tk.Label(self, text="Opacity:", anchor="w").grid(row=3, column=0, sticky="w", padx=5, pady=5)
-        self.opacity_slider = tk.Scale(self, variable=self.settings["opacity"], from_=0, to=100, orient=tk.HORIZONTAL)
+        self.opacity_slider = tk.Scale(self, variable=self.settings["opacity"], from_=0, to=255, orient=tk.HORIZONTAL)
         self.opacity_slider.grid(row=3, column=1, sticky="ew", padx=5, pady=5)
 
         # Row 4: Angle setting
         tk.Label(self, text="Angle:", anchor="w").grid(row=4, column=0, sticky="w", padx=5, pady=5)
-        self.angle_slider = tk.Scale(self, variable=self.settings["angle"], from_=0, to=360, orient=tk.HORIZONTAL)
+        self.angle_slider = tk.Scale(self, variable=self.settings["angle"], from_=0, to=90, orient=tk.HORIZONTAL)
         self.angle_slider.grid(row=4, column=1, sticky="ew", padx=5, pady=5)
 
-        # Row 5: Apply button
-        self.apply_button = tk.Button(self, text="Apply Settings", command=self.callbacks[0])
+        # Row 5: Update button
+        self.apply_button = tk.Button(self, text="Update Preview", command=self.callbacks[0])
         self.apply_button.grid(row=5, column=0, columnspan=2, pady=10)
 
-        # # Configure the grid to expand properly
-        # self.columnconfigure(1, weight=1)
 
     def choose_color(self):
         color = colorchooser.askcolor(initialcolor=self.color_value)
         if color[1]:  # If a color was chosen (not canceled)
-            self.color_value = color[1]
-            self.color_frame.config(bg=self.color_value)
+            self.settings['color'].set(color[1])
+            self.color_frame.config(bg=self.settings['color'].get())
 
 class ImagePreviewLabel(tk.Label):
     def __init__(self, parent, callbacks):

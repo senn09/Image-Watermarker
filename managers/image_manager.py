@@ -19,7 +19,7 @@ class ImageManager:
 
         filepaths = fd.askopenfilenames(
             title='Open files',
-            initialdir='/Users/stevenhan/PycharmProjects/watermarker/images',
+            initialdir='/images',
             filetypes=filetypes)
 
         if filepaths:
@@ -42,7 +42,7 @@ class ImageManager:
                 base_im = base_im.convert('RGBA')
 
             # Create Watermark ---------------------------------------------------------------------
-            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", 100, encoding="unic")
+            font = ImageFont.truetype("/Library/Fonts/Arial.ttf", settings['font_size'].get(), encoding="unic")
             text = settings["text"].get()
             bbox = font.getbbox(text)
             text_w = int(bbox[2] - bbox[0])
@@ -52,7 +52,7 @@ class ImageManager:
             wm_img = Image.new("RGBA", wm_img_size, (255, 255, 255, 0))
 
             d = ImageDraw.Draw(wm_img)
-            d.text((text_w / 2, text_h), text, fill=(255, 0, 0, 255), anchor="ms", font=font)
+            d.text((text_w / 2, text_h), text, fill=self.hex2rgb(settings['color'], settings['opacity']), anchor="ms", font=font)
             wm_img = wm_img.rotate(wm_angle, expand=True)
 
             # Create Tiled Watermark ---------------------------------------------------------------------
@@ -82,16 +82,26 @@ class ImageManager:
         print("image saved")
 
         filetypes = (
-            ('Image files', '*.jpg'),
+            ('Image files', '*.jpeg'),
             ('All files', '*.*')
         )
 
-        filepath = fd.asksaveasfile(initialfile='saved_images/watermarked_image.txt',
-                              defaultextension=".jpg", filetypes=filetypes)
+        filepath = fd.asksaveasfile(initialfile='watermarked_image.jpeg',
+                                    initialdir='/saved_images',
+                              defaultextension=".jpeg", filetypes=filetypes)
 
 
         export_image = self.watermarked_image.convert('RGB')
         export_image = export_image.save(filepath)
+
+    def hex2rgb(self, hexcode, alpha_value):
+        # Remove '#' if present
+        hexcode = hexcode.get().lstrip('#')
+
+        # Convert pairs of hex digits to integers
+        rgb =  tuple(int(hexcode[i:i + 2], 16) for i in range(0, len(hexcode), 2))
+        return rgb + (alpha_value.get(),)
+
 
 if __name__ == "__main__":
     manager = ImageManager()
@@ -101,7 +111,7 @@ if __name__ == "__main__":
     settings = {
         "text": "watermark",
         "font_size": 120,
-        # "color": self.color_frame.get(),
+        "color": "#FF0000",
         "opacity": 100,
         "angle": 45,
     }
