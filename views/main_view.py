@@ -1,7 +1,6 @@
 from tkinter import ttk, colorchooser, filedialog as fd, image_names
 import tkinter as tk
 from managers.image_manager import ImageManager
-from managers.settings_manager import SettingsManager
 from PIL import ImageTk
 from typing import Dict, Any
 import logging
@@ -12,11 +11,8 @@ class MainView():
         self.root = tk.Tk()
         self.root.title("Image Watermarker")
         self.root.geometry("900x600")  # Set initial window size
-        # self.root.columnconfigure(1, weight=1)
-        # self.root.rowconfigure(0, weight=1)
 
         self.image_manager = ImageManager()
-        self.settings_manager = SettingsManager()
 
         # create menubar
         self.menubar_callbacks = [self.import_images, self.export_images]
